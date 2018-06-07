@@ -35,5 +35,26 @@ package components {
 				_buttonHandler();
 			}
 		}
+		public function setAll(user:Object):void {
+			setName(user.initName);
+			switch (Main.store.state.scene) {
+				case 0:
+					setButton();
+					var status:String = "не подключен";
+					if (user.connected == true) {
+						status = "подключен, но не готов";
+					}
+					if (user.ready == true) {
+						status = "готов";
+					}
+					setStatus(status);
+					break;
+				case 1:
+					setButton();
+					setStatus();
+					break;
+			}
+		}
+		
 	}
 }

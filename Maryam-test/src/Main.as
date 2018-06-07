@@ -1,6 +1,9 @@
 package {
-	import components.Scene0;
+	import components.Field;
+	import components.scenes.Scene0;
+	import components.scenes.Scene1;
 	import events.CheckoutEvent;
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.external.ExternalInterface;
@@ -11,8 +14,11 @@ package {
 		public static var urlParams:Object;
 		
 		public static var userId:String;
+		public static var previousStore:Object;
 		public static var store:Object;
-		private var scene0:Scene0;
+		
+		private var _field:Field;
+		private var _scene:DisplayObject;
 		private static var instance:Sprite;
 		private static var apiUrl:String;
 		
@@ -40,10 +46,15 @@ package {
 		private function _start(e:CheckoutEvent):void {
 			Main.instance.removeEventListener(CheckoutEvent.CHECKOUT, _start);
 			
-			scene0 = new Scene0();
-			stage.addChild(scene0);
+			_field = new Field();
+			_scene = new Scene0();
+			stage.addChild(_scene);
+			stage.addChild(_field);
+			
+			addCheckoutListener(_checkout);
 		}
 		private function _wsCallback(s:String):void {
+			Main.previousStore = Main.store;
 			Main.store = JSON.parse(s);
 			Main.instance.dispatchEvent(new CheckoutEvent(CheckoutEvent.CHECKOUT));
 		}
@@ -58,6 +69,21 @@ package {
 			message.id = Main.urlParams.id;
 			message.key = Main.urlParams.key;
 			new SimpleRequest(apiUrl + method, message, "POST");
+		}
+		private function _checkout(e:CheckoutEvent):void {
+			if (Main.previousStore == null || Main.store.state.scene != Main.previousStore.state.scene) {
+				stage.removeChild(_scene);
+				switch (Main.store.state.scene) {
+					case 0:
+						_scene = new Scene0();
+						break;
+					case 1:
+						_scene = new Scene1();
+						break;
+				}
+				stage.addChild(_scene);
+				stage.addChild(_field);
+			}
 		}
 	}
 	

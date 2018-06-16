@@ -1,5 +1,10 @@
 package components.scenes {
 	import com.adobe.tvsdk.mediacore.events.TimedEvent;
+	import com.greensock.TweenLite;
+	import com.greensock.easing.BackInOut;
+	import com.greensock.easing.SineInOut;
+	import components.Figure;
+	import flash.display.MovieClip;
 	import flash.events.MouseEvent;
 	import events.CheckoutEvent;
 	import flash.events.TimerEvent;
@@ -7,6 +12,8 @@ package components.scenes {
 	
 	public class Scene1 extends Scene1View {
 		private var _figures:Array;
+		private var _chosenFigure:MovieClip;
+		private var _animationStart:Boolean = false;
 		private var _animationComplete:Boolean = false;
 		
 		public function Scene1() {
@@ -15,6 +22,9 @@ package components.scenes {
 			Main.addCheckoutListener(_checkout);
 		}
 		private function _checkout(e:CheckoutEvent = null):void {
+			if (_animationStart && !_animationComplete) {
+				return;
+			}
 			var i:int;
 			if (Main.store.state.scene !== 1) {
 				return;
@@ -50,11 +60,13 @@ package components.scenes {
 						_figures[i].figure.figureCircle = _figures[i].circle;
 						_figures[i].figure.addEventListener(MouseEvent.CLICK, choose, false, 0, true);
 					}
-				} else if (_animationComplete == false) {
+				} else if (_animationStart == false) {
+					_animationStart = true;
 					gotoAndStop(1);
 					Main.instance.instructionsClear();
-					this[Main.store.users[Main.userId].figure.type + Main.store.users[Main.userId].figure.circle].gotoAndStop(2);
-					this[Main.store.users[Main.userId].figure.type + Main.store.users[Main.userId].figure.circle].m.gotoAndStop(1);
+					_chosenFigure = this[Main.store.users[Main.userId].figure.type + Main.store.users[Main.userId].figure.circle];
+					_chosenFigure.gotoAndStop(2);
+					_chosenFigure.m.gotoAndStop(1);
 					for (i = 0; i < _figures.length; i++) {
 						if (_figures[i].figure.currentFrame == 1) {
 							_figures[i].figure.gotoAndPlay(5 + Math.round(Math.random() * 40));
@@ -64,20 +76,41 @@ package components.scenes {
 					var t:Timer = new Timer(2000, 1);
 					t.addEventListener(TimerEvent.TIMER_COMPLETE, animationComplete, false, 0, true);
 					t.start();
-				} else {
-					gotoAndStop(2);
-					Main.instance.instructionsGo(3);
 				}
 			}
 			if (Main.store.state.step == 1) {
-				
+				gotoAndStop(4);
+				t_apply.mouseEnabled = false;
+				Main.instance.instructionsGo(3);
+				if (userFigure == null) {
+					var userFigure:Figure = new Figure();
+					userFigure.x = 160;
+					userFigure.y = 90;
+					userFigure.setAll(Main.store.users[Main.userId]);
+				}
+				addChild(userFigure);
 			}
 		}
 		private function choose(e:MouseEvent):void {
 			Main.post("chooseFigure", { type: e.target.parent.figureType, circle: e.target.parent.figureCircle });
 		}
 		private function animationComplete(e:TimerEvent):void {
+			gotoAndStop(2);
+			var userFigure:Figure = new Figure();
+			userFigure.x = _chosenFigure.x;
+			userFigure.y = _chosenFigure.y;
+			userFigure.setAll(Main.store.users[Main.userId]);
+			addChild(userFigure);
+			new TweenLite(userFigure, 1, { x: 160, y: 90, ease: new SineInOut(), onComplete: animation1Complete });
+		}
+		private function animation1Complete():void {
+			var t:Timer = new Timer(1000, 1);
+			t.addEventListener(TimerEvent.TIMER_COMPLETE, animation1Complete1, false, 0, true);
+			t.start();
+		}
+		private function animation1Complete1(e:TimerEvent):void {
 			_animationComplete = true;
+			_checkout();
 		}
 	}
 }

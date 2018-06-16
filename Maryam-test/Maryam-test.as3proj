@@ -5,7 +5,7 @@
     <movie outputType="Application" />
     <movie input="" />
     <movie path="..\..\maryam-test\static\Maryam-test.swf" />
-    <movie fps="30" />
+    <movie fps="60" />
     <movie width="800" />
     <movie height="500" />
     <movie version="21" />
@@ -52,7 +52,7 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <element path="lib\swc\Main.swc" />
+    <element path="lib\swc\Views.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

@@ -36,7 +36,13 @@ package components {
 			}
 		}
 		public function setAll(user:Object):void {
+			//trace(JSON.stringify(user));
 			setName(user.initName);
+			if (user.id == Main.userId) {
+				setName(user.initName + " (вы)");
+			} else {
+				setName(user.initName);
+			}
 			switch (Main.store.state.scene) {
 				case 0:
 					setButton();

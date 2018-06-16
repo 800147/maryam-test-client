@@ -1,5 +1,6 @@
 package {
 	import components.Field;
+	import components.InstructionsContainer;
 	import components.scenes.Scene0;
 	import components.scenes.Scene1;
 	import events.CheckoutEvent;
@@ -19,7 +20,8 @@ package {
 		
 		private var _field:Field;
 		private var _scene:DisplayObject;
-		private static var instance:Sprite;
+		private var _instructionsContainer:InstructionsContainer;
+		public static var instance:Main;
 		private static var apiUrl:String;
 		
 		public function Main() {
@@ -32,7 +34,6 @@ package {
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			// entry point
 			
-			Main.instance.addEventListener(CheckoutEvent.CHECKOUT, _start);
 			if (ExternalInterface.available) {
 				urlParams = ExternalInterface.call("getUrlParams");
 				apiUrl = "./api/";
@@ -41,7 +42,10 @@ package {
 				apiUrl = "http://localhost:8080/api/";
 			}
 			userId = urlParams.id;
+			Main.instance.addEventListener(CheckoutEvent.CHECKOUT, _start);
 			new utils.WSBridge(_wsCallback);
+			
+			_instructionsContainer = new InstructionsContainer();
 		}
 		private function _start(e:CheckoutEvent):void {
 			Main.instance.removeEventListener(CheckoutEvent.CHECKOUT, _start);
@@ -82,8 +86,18 @@ package {
 						break;
 				}
 				stage.addChild(_scene);
+				stage.addChild(_instructionsContainer);
 				stage.addChild(_field);
 			}
+		}
+		
+		
+		
+		public function instructionsGo(frame:Object, withAnimation:Boolean = true):void {
+			_instructionsContainer.go(frame, withAnimation);
+		}
+		public function instructionsClear():void {
+			_instructionsContainer.clear();
 		}
 	}
 	

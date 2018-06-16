@@ -18,7 +18,7 @@ package components {
 		private function _checkout(e:CheckoutEvent = null):void {
 			for (var userId:String in Main.store.users) {
 				_users[userId].setAll(Main.store.users[userId]);
-			}			
+			}
 		}
 	}
 }
